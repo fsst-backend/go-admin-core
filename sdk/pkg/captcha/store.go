@@ -21,8 +21,8 @@ func NewCacheStore(cache storage.AdapterCache, expiration int) base64Captcha.Sto
 }
 
 // Set sets the digits for the captcha id.
-func (e *cacheStore) Set(id string, value string) {
-	_ = e.cache.Set(id, value, e.expiration)
+func (e *cacheStore) Set(id string, value string) error {
+	return e.cache.Set(id, value, e.expiration)
 }
 
 // Get returns stored digits for the captcha id. Clear indicates
