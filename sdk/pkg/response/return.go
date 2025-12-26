@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/go-admin-team/go-admin-core/errors"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
 )
 
@@ -36,19 +37,19 @@ func OK(c *gin.Context, data interface{}, msg string) {
 		res.SetMsg(msg)
 	}
 	res.SetTraceID(pkg.GenerateMsgIDFromContext(c))
-	res.SetCode(http.StatusOK)
+	res.SetCode(int32(errors.OK))
 	c.Set("result", res)
 	c.Set("status", http.StatusOK)
 	c.AbortWithStatusJSON(http.StatusOK, res)
 }
 
 // PageOK 分页数据处理
-func PageOK(c *gin.Context, result interface{}, count int, pageIndex int, pageSize int, msg string) {
+func PageOK(c *gin.Context, result interface{}, count int, offset int, limit int, msg string) {
 	var res page
 	res.List = result
 	res.Count = count
-	res.PageIndex = pageIndex
-	res.PageSize = pageSize
+	res.Offset = offset
+	res.Limit = limit
 	OK(c, res, msg)
 }
 

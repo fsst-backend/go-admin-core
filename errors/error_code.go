@@ -7,7 +7,7 @@ import "net/http"
 type ErrorCode int32
 
 const (
-	OK                  ErrorCode = http.StatusOK
+	OK                  ErrorCode = 0
 	BadRequest          ErrorCode = http.StatusBadRequest
 	Unauthorized        ErrorCode = http.StatusUnauthorized
 	Forbidden           ErrorCode = http.StatusForbidden

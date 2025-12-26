@@ -14,9 +14,9 @@ type response struct {
 }
 
 type Page struct {
-	Count     int `json:"count"`
-	PageIndex int `json:"pageIndex"`
-	PageSize  int `json:"pageSize"`
+	Count  int `json:"count"`
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
 }
 
 type page struct {
