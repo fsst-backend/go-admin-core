@@ -10,7 +10,7 @@ type Response struct {
 
 type response struct {
 	Response
-	Data interface{} `json:"message"`
+	Message interface{} `json:"message"`
 }
 
 type Page struct {
@@ -25,7 +25,7 @@ type page struct {
 }
 
 func (e *response) SetData(data interface{}) {
-	e.Data = data
+	e.Message = data
 }
 
 func (e response) Clone() Responses {
