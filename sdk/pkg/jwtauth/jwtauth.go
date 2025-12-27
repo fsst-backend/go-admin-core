@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	adminErrors "github.com/go-admin-team/go-admin-core/errors"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -319,7 +320,7 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.LoginResponse == nil {
 		mw.LoginResponse = func(c *gin.Context, code int, token string, expire time.Time) {
 			c.JSON(http.StatusOK, gin.H{
-				"code":   http.StatusOK,
+				"code":   int32(adminErrors.OK),
 				"token":  token,
 				"expire": expire.Format(time.RFC3339),
 			})
@@ -329,7 +330,7 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.AntdLoginResponse == nil {
 		mw.AntdLoginResponse = func(c *gin.Context, code int, token string, expire time.Time) {
 			c.JSON(http.StatusOK, gin.H{
-				"code":             http.StatusOK,
+				"code":             adminErrors.OK,
 				"success":          true,
 				"token":            token,
 				"currentAuthority": token,
@@ -341,7 +342,7 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.RefreshResponse == nil {
 		mw.RefreshResponse = func(c *gin.Context, code int, token string, expire time.Time) {
 			c.JSON(http.StatusOK, gin.H{
-				"code":   http.StatusOK,
+				"code":   adminErrors.OK,
 				"token":  token,
 				"expire": expire.Format(time.RFC3339),
 			})

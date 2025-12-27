@@ -10,7 +10,7 @@ type Response struct {
 
 type response struct {
 	Response
-	Data interface{} `json:"data"`
+	Data interface{} `json:"message"`
 }
 
 type Page struct {
