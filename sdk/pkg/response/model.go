@@ -1,6 +1,6 @@
 package response
 
-type Response struct {
+type ResponseMeta struct {
 	// 数据集
 	RequestId string `protobuf:"bytes,1,opt,name=requestId,proto3" json:"requestId"`
 	Code      int32  `protobuf:"varint,2,opt,name=code,proto3" json:"code"`
@@ -8,43 +8,39 @@ type Response struct {
 	Status    string `protobuf:"bytes,4,opt,name=status,proto3" json:"status"`
 }
 
-type response struct {
-	Response
-	Message interface{} `json:"message"`
+type Response struct {
+	ResponseMeta
+	Message any `json:"message"`
 }
 
-type Page struct {
+type PageMeta struct {
 	Count  int `json:"count"`
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"`
 }
 
-type page struct {
-	Page
-	List interface{} `json:"list"`
+type Page struct {
+	PageMeta
+	List any `json:"list"`
 }
 
-func (e *response) SetData(data interface{}) {
+func (e *Response) SetData(data any) {
 	e.Message = data
 }
 
-func (e response) Clone() Responses {
-	return &e
-}
-
-func (e *response) SetTraceID(id string) {
+func (e *Response) SetTraceID(id string) {
 	e.RequestId = id
 }
 
-func (e *response) SetMsg(s string) {
+func (e *Response) SetMsg(s string) {
 	e.Msg = s
 }
 
-func (e *response) SetCode(code int32) {
+func (e *Response) SetCode(code int32) {
 	e.Code = code
 }
 
-func (e *response) SetSuccess(success bool) {
+func (e *Response) SetSuccess(success bool) {
 	if !success {
 		e.Status = "error"
 	}
