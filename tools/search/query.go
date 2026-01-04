@@ -46,6 +46,14 @@ func ResolveSearchQuery(driver string, q interface{}, condition Condition) {
 		case "-":
 			continue
 		}
+
+		field := qValue.Field(i)
+
+		// ⭐ 唯一生效规则
+		if field.Kind() == reflect.Ptr && field.IsNil() {
+			continue
+		}
+
 		t = makeTag(tag)
 		if qValue.Field(i).IsZero() {
 			continue
