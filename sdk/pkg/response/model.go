@@ -10,6 +10,7 @@ type ResponseMeta struct {
 
 type Response struct {
 	ResponseMeta
+	// 实体返回放到 message 字段，不再使用 data
 	Message any `json:"message"`
 }
 
