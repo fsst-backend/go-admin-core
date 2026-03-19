@@ -10,7 +10,8 @@ type Response struct {
 
 type response struct {
 	Response
-	Data interface{} `json:"data"`
+	// 实体返回放到 message 字段，不再使用 data
+	Data interface{} `json:"message"`
 }
 
 type Page struct {
