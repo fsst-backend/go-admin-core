@@ -38,6 +38,7 @@ func ResolveSearchQuery(driver string, q interface{}, condition Condition) {
 	if driver == Postgres {
 		sep = "\""
 	}
+	_ = sep // reserved for column quoting (MySQL vs Postgres)
 
 	for i := 0; i < qType.NumField(); i++ {
 		tag, ok = "", false
