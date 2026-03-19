@@ -24,24 +24,24 @@ type configJsonBody struct {
 	DriverDigit   *base64Captcha.DriverDigit
 }
 
-func DriverStringFunc() (id, b64s string, digitKey string, err error) {
+func DriverStringFunc() (id, b64s, answer string, err error) {
 	e := configJsonBody{}
 	e.Id = uuid.New().String()
-	e.DriverString = base64Captcha.NewDriverString(46, 140, 2, 2, 4, "234567890abcdefghjkmnpqrstuvwxyz", &color.RGBA{240, 240, 246, 246}, nil, []string{"wqy-microhei.ttc"})
+	e.DriverString = base64Captcha.NewDriverString(46, 140, 2, 2, 4, "234567890abcdefghjkmnpqrstuvwxyz", &color.RGBA{240, 240, 246, 246}, base64Captcha.DefaultEmbeddedFonts, []string{"wqy-microhei.ttc"})
 	driver := e.DriverString.ConvertFonts()
 	cap := base64Captcha.NewCaptcha(driver, base64Captcha.DefaultMemStore)
-	id, b64s, digitKey, err = cap.Generate()
-	return
+	id, b64s, answer, err = cap.Generate()
+	return id, b64s, answer, err
 }
 
-func DriverDigitFunc() (id, b64s string, digitKey string, err error) {
+func DriverDigitFunc() (id, b64s, answer string, err error) {
 	e := configJsonBody{}
 	e.Id = uuid.New().String()
 	e.DriverDigit = base64Captcha.NewDriverDigit(80, 240, 4, 0.7, 80)
 	driver := e.DriverDigit
 	cap := base64Captcha.NewCaptcha(driver, base64Captcha.DefaultMemStore)
-	id, b64s, digitKey, err = cap.Generate()
-	return
+	id, b64s, answer, err = cap.Generate()
+	return id, b64s, answer, err
 }
 
 // Verify 校验验证码
