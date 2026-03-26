@@ -6,6 +6,22 @@ import (
 	"strings"
 )
 
+// stringSearchValue returns the string used for LIKE / ILIKE patterns and order direction.
+// reflect.Value.String() only works when Kind == String; for *string it returns "<*string Value>",
+// which breaks optional query DTO fields bound as pointers.
+func stringSearchValue(v reflect.Value) string {
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+		if v.IsNil() {
+			return ""
+		}
+		v = v.Elem()
+	}
+	if v.Kind() == reflect.String {
+		return v.String()
+	}
+	return fmt.Sprint(v.Interface())
+}
+
 const (
 	// FromQueryTag tag标记
 	FromQueryTag = "search"
@@ -96,9 +112,9 @@ func pgSql(driver string, t *resolveSearchTag, condition Condition, qValue refle
 	case "exact", "iexact":
 		condition.SetWhere(fmt.Sprintf("%s.%s = ?", t.Table, t.Column), []interface{}{val})
 	case "icontains":
-		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{"%" + val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i)) + "%"})
 	case "contains":
-		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{"%" + val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i)) + "%"})
 	case "gt":
 		condition.SetWhere(fmt.Sprintf("%s.%s > ?", t.Table, t.Column), []interface{}{val})
 	case "gte":
@@ -108,13 +124,13 @@ func pgSql(driver string, t *resolveSearchTag, condition Condition, qValue refle
 	case "lte":
 		condition.SetWhere(fmt.Sprintf("%s.%s <= ?", t.Table, t.Column), []interface{}{val})
 	case "istartswith":
-		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{stringSearchValue(qValue.Field(i)) + "%"})
 	case "startswith":
-		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{stringSearchValue(qValue.Field(i)) + "%"})
 	case "iendswith":
-		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{"%" + val.(string)})
+		condition.SetWhere(fmt.Sprintf("%s.%s ilike ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i))})
 	case "endswith":
-		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{"%" + val.(string)})
+		condition.SetWhere(fmt.Sprintf("%s.%s like ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i))})
 	case "in":
 		condition.SetWhere(fmt.Sprintf("%s.%s in (?)", t.Table, t.Column), []interface{}{val})
 	case "isnull":
@@ -122,9 +138,10 @@ func pgSql(driver string, t *resolveSearchTag, condition Condition, qValue refle
 			condition.SetWhere(fmt.Sprintf("%s.%s isnull", t.Table, t.Column), make([]interface{}, 0))
 		}
 	case "order":
-		switch strings.ToLower(unwrapValue(field).String()) {
+		dir := stringSearchValue(qValue.Field(i))
+		switch strings.ToLower(dir) {
 		case "desc", "asc":
-			condition.SetOrder(fmt.Sprintf("%s.%s %s", t.Table, t.Column, unwrapValue(field).String()))
+			condition.SetOrder(fmt.Sprintf("%s.%s %s", t.Table, t.Column, dir))
 		}
 	}
 }
@@ -149,7 +166,7 @@ func otherSql(driver string, t *resolveSearchTag, condition Condition, qValue re
 	case "exact", "iexact":
 		condition.SetWhere(fmt.Sprintf("`%s`.`%s` = ?", t.Table, t.Column), []interface{}{val})
 	case "contains", "icontains":
-		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{"%" + val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i)) + "%"})
 	case "gt":
 		condition.SetWhere(fmt.Sprintf("`%s`.`%s` > ?", t.Table, t.Column), []interface{}{val})
 	case "gte":
@@ -159,9 +176,9 @@ func otherSql(driver string, t *resolveSearchTag, condition Condition, qValue re
 	case "lte":
 		condition.SetWhere(fmt.Sprintf("`%s`.`%s` <= ?", t.Table, t.Column), []interface{}{val})
 	case "startswith", "istartswith":
-		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{val.(string) + "%"})
+		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{stringSearchValue(qValue.Field(i)) + "%"})
 	case "endswith", "iendswith":
-		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{"%" + val.(string)})
+		condition.SetWhere(fmt.Sprintf("`%s`.`%s` like ?", t.Table, t.Column), []interface{}{"%" + stringSearchValue(qValue.Field(i))})
 	case "in":
 		condition.SetWhere(fmt.Sprintf("`%s`.`%s` in (?)", t.Table, t.Column), []interface{}{val})
 	case "isnull":
@@ -169,9 +186,10 @@ func otherSql(driver string, t *resolveSearchTag, condition Condition, qValue re
 			condition.SetWhere(fmt.Sprintf("`%s`.`%s` isnull", t.Table, t.Column), make([]interface{}, 0))
 		}
 	case "order":
-		switch strings.ToLower(unwrapValue(field).String()) {
+		dir := stringSearchValue(qValue.Field(i))
+		switch strings.ToLower(dir) {
 		case "desc", "asc":
-			condition.SetOrder(fmt.Sprintf("`%s`.`%s` %s", t.Table, t.Column, unwrapValue(field).String()))
+			condition.SetOrder(fmt.Sprintf("`%s`.`%s` %s", t.Table, t.Column, dir))
 		}
 	}
 }
